@@ -1,4 +1,4 @@
-const CACHE = 'team-balancer-v1';
+const CACHE = 'team-balancer-v4';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/balancer.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
