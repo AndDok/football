@@ -147,11 +147,39 @@ document.getElementById('balance').onclick = () => {
 };
 
 // ---------- Результат ----------
-function renderResult(teamA, teamB, diff) {
+function renderResult(teamA, teamB, diff, meta = {}) {
   const diffClass = diff === 0 ? 'ok' : diff <= 2 ? 'warn' : 'bad';
+  const { mode = 'optimal', index = 0, total = 1, optimalDiff = diff } = meta;
+
+  let hintHtml = '';
+  let refreshLabel = '🔄 Обновить';
+  let refreshDisabled = false;
+
+  if (mode === 'shuffle') {
+    refreshLabel = '🎲 Перемешать';
+    hintHtml = `
+      <div class="variants-hint">
+        Оптимальная разница: ${optimalDiff} · сейчас — случайный состав
+      </div>`;
+  } else if (total > 1) {
+    hintHtml = `<div class="variants-hint">Вариант ${index + 1} из ${total} · все оптимальны</div>`;
+  } else {
+    hintHtml = `<div class="variants-hint">Оптимальный вариант один · «Перемешать» даст случайный состав</div>`;
+    refreshLabel = '🎲 Перемешать';
+  }
+
   resultEl.innerHTML = `
     <div class="diff ${diffClass}">Разница уровней: ${diff}</div>
-    <button class="copy-btn" id="copy" type="button">📋 Скопировать состав</button>
+
+    <div class="result-actions">
+      <button class="refresh-btn" id="refresh" type="button" ${refreshDisabled ? 'disabled' : ''}>
+        ${refreshLabel}
+      </button>
+      <button class="copy-btn" id="copy" type="button">📋 Скопировать</button>
+    </div>
+
+    ${hintHtml}
+
     <div class="teams">
       ${teamHtml('Команда A', teamA, 'A')}
       ${teamHtml('Команда B', teamB, 'B')}
@@ -159,6 +187,8 @@ function renderResult(teamA, teamB, diff) {
   `;
 
   document.getElementById('copy').onclick = () => shareTeams(teamA, teamB, diff);
+  const refreshBtn = document.getElementById('refresh');
+  if (refreshBtn && !refreshDisabled) refreshBtn.onclick = refreshTeams;
 }
 
 function teamHtml(title, team, cls) {
